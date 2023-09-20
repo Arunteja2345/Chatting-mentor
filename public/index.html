@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat App</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+  <div id="chat-container">
+    <div class="header">Chat with Students</div>
+    <ul id="messages"></ul>
+    <div id="input-container">
+      <input id="messageInput" autocomplete="off" placeholder="Type your message and press Enter" />
+      <button id="sendButton">Send</button>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(function () {
+      const $messageInput = $('#messageInput');
+      const $messages = $('#messages');
+
+      function sendMessage() {
+        const message = $messageInput.val();
+        if (message.trim() !== '') {
+          $.post('/send-message', { message }, (response) => {
+            if (response.success) {
+              $messageInput.val('');
+            } else {
+              alert('Message cannot be empty.');
+            }
+          });
+        }
+      }
+
+      $('#sendButton').click(sendMessage);
+
+      function displayMessages() {
+        $.get('/get-messages', (data) => {
+          $messages.empty();
+          data.forEach((message) => {
+            $messages.append($('<li>').text(message));
+          });
+        });
+      }
+
+      // Load existing messages when the page loads
+      displayMessages();
+
+      // Poll for new messages every few seconds
+      setInterval(displayMessages, 5000); // Adjust the interval as needed
+    });
+  </script>
+</body>
+</html>
